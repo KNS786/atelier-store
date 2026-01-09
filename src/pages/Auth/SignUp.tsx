@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/Auth/Signup.tsx
 import React from "react";
 import { useState, type ChangeEvent, type FormEvent, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -123,7 +121,7 @@ export default function Signup() {
       const response = await signup(signupPayload);
       toast.success("User registed successfull");
       navigate("/login");
-      
+
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || "Signup failed. Please try again.";
       setState(prev => ({ ...prev, error: errorMessage }));

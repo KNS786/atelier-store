@@ -1,20 +1,58 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { products } from '../data/products';
 import Header from "../components/Header";
 import { Button } from '../components/ui/button';
 import { Star, ArrowLeft, Heart, Truck, Shield, RotateCcw } from 'lucide-react';
+import { getProductById } from '../services/api';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const product = products.find((p) => p.id === id);
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!product) {
+  // Fetch product details
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const result = await getProductById(id);
+        
+        const productData = result.data || result.data || result;
+        setProduct(productData);
+      } catch (err: any) {
+        setError(err.message);
+        console.error('Error fetching product:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-muted-foreground text-lg">Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="font-display text-2xl font-semibold text-foreground mb-4">
-            Product not found
+            {error ? `Error: ${error}` : 'Product not found'}
           </h1>
           <Link to="/" className="text-primary hover:underline">
             Return to shop

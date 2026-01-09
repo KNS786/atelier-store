@@ -1,14 +1,9 @@
-import type { Product } from '../types/product';
 import { Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface ProductCardProps {
-  product: Product;
-}
-
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product }: any) => {
   return (
-    <Link to={`/product/${product.id}`} className="block group">
+    <Link to={`/product/${product.id || product._id}`} className="block group">
       <article className="product-card">
         <div className="relative aspect-[3/4] overflow-hidden">
           <img

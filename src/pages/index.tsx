@@ -1,5 +1,4 @@
-import { useState, useMemo } from 'react';
-import { products } from '../data/products';
+import { useState, useEffect } from 'react';
 import { type Category } from '../types/product';
 import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
@@ -13,6 +12,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../components/ui/pagination';
+import { getProducts } from '../services/api';
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -21,26 +21,45 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [activeCategory, searchQuery]);
+  const [products, setProducts] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-  
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+  // Fetch products from API
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await getProducts(currentPage, PRODUCTS_PER_PAGE, activeCategory, searchQuery);
+      console.log("response:::", result);
+      
+      
+      // Your API structure: { data: { data: [...products], pagination: {...} } }
+      const products = result.data || [];
+      const total = result?.pagination?.total || 0;
+      
+      setProducts(products);
+      setTotalCount(total);
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch products on initial render and when dependencies change
+  useEffect(() => {
+    fetchProducts();
+  }, [currentPage, activeCategory, searchQuery]);
 
   // Reset to page 1 when filters change
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [activeCategory, searchQuery]);
+
+  const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -74,16 +93,30 @@ const Index = () => {
 
         {/* Products Grid */}
         <section>
-          {paginatedProducts.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">Loading products...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <p className="text-red-500 text-lg">Error: {error}</p>
+              <button 
+                onClick={fetchProducts} 
+                className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              >
+                Retry
+              </button>
+            </div>
+          ) : products.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">No products found</p>
               <p className="text-muted-foreground text-sm mt-2">Try adjusting your search or filters</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {paginatedProducts.map((product, index) => (
+              {products.map((product: any, index) => (
                 <div
-                  key={product.id}
+                  key={product._id || product.id}
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
@@ -95,7 +128,7 @@ const Index = () => {
         </section>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalPages > 1 && !loading && (
           <section className="mt-10">
             <Pagination>
               <PaginationContent>
@@ -118,7 +151,7 @@ const Index = () => {
                 ))}
                 <PaginationItem>
                   <PaginationNext 
-                    onClick={() => currentPage < totalPages && handlePageChange(currentPage - 1)}
+                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
                     className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                   />
                 </PaginationItem>
@@ -128,9 +161,11 @@ const Index = () => {
         )}
 
         {/* Results Count */}
-        <div className="text-center mt-6 text-sm text-muted-foreground">
-          Showing {((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}-{Math.min(currentPage * PRODUCTS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length} products
-        </div>
+        {!loading && products.length > 0 && (
+          <div className="text-center mt-6 text-sm text-muted-foreground">
+            Showing {((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}-{Math.min(currentPage * PRODUCTS_PER_PAGE, totalCount)} of {totalCount} products
+          </div>
+        )}
       </main>
     </div>
   );
