@@ -180,5 +180,5 @@ export const payOrder = async (orderId: string ) => {
                     'Authorization': `Bearer ${token}`
                 },
     });
-    return response ;
+    return response.data;
 };
