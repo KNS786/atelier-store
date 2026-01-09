@@ -2,14 +2,31 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from "../components/Header";
 import { Button } from '../components/ui/button';
-import { Star, ArrowLeft, Heart, Truck, Shield, RotateCcw } from 'lucide-react';
+import { Star, ArrowLeft, Heart, Truck, Shield, RotateCcw, Minus, Plus } from 'lucide-react';
 import { getProductById } from '../services/api';
+import { useCart } from '../contexts/CartContext';
+import { useToast } from '../hooks/use-toast';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
+
+  const { toast } = useToast();
+
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product, quantity);
+      toast({
+        title: 'Added to cart',
+        description: `${quantity}x ${product.name} has been added to your cart.`,
+      });
+    }
+  };
 
   // Fetch product details
   useEffect(() => {
@@ -130,12 +147,39 @@ const ProductDetail = () => {
                 )}
               </div>
 
+                {/* Quantity Selector */}
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-sm font-medium text-foreground">Quantity</span>
+                <div className="flex items-center gap-2 bg-muted rounded-full">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="w-4 h-4" />
+                  </Button>
+                  <span className="w-8 text-center font-medium">{quantity}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full"
+                    onClick={() => setQuantity(quantity + 1)}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
               {/* Actions */}
               <div className="flex gap-3 mb-8">
                 <Button
                   size="lg"
                   className="flex-1 h-12 rounded-full font-medium"
                   disabled={!product.inStock}
+                  onClick={handleAddToCart}
+
                 >
                   Add to Cart
                 </Button>

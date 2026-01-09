@@ -2,6 +2,7 @@ import { ShoppingBag, Heart, Menu, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { useCart } from '../contexts/CartContext';
 
 interface HeaderProps {
   searchQuery?: string;
@@ -9,6 +10,8 @@ interface HeaderProps {
 }
 
 const Header = ({ searchQuery = '', onSearchChange }: HeaderProps) => {
+  const { totalItems } = useCart();
+
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
@@ -35,12 +38,16 @@ const Header = ({ searchQuery = '', onSearchChange }: HeaderProps) => {
             <Button variant="ghost" size="icon" className="text-foreground hover:text-primary">
               <Heart className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-foreground hover:text-primary relative">
-              <ShoppingBag className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
-                0
-              </span>
-            </Button>
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" className="text-foreground hover:text-primary relative">
+                <ShoppingBag className="w-5 h-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
             <Button variant="ghost" size="icon" className="md:hidden text-foreground">
               <Menu className="w-5 h-5" />
             </Button>
