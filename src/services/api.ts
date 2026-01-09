@@ -146,3 +146,39 @@ export const clearCart = async () => {
         );
         return response.data;
 };
+
+export interface CreateOrderPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  shippingAddress: {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+}
+
+
+export const createOrder = async (payload: CreateOrderPayload) => {
+    const token = sessionStorage.getItem('accessToken');
+    const { data } = await axios.post( `http://localhost:5000/api/orders`, payload , {
+         headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+    });
+    return data;
+};
+
+export const payOrder = async (orderId: string ) => {
+    const token = sessionStorage.getItem('accessToken');
+    const { data } = await axios.post( `http://localhost:5000/api/payment/payu` , { orderId }, {
+         headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+    });
+    return data;
+};

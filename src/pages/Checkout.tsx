@@ -7,6 +7,7 @@ import { Label } from '../components/ui/label';
 import { useCart } from '../contexts/CartContext';
 import { ArrowLeft, Check } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
+import { createOrder, payOrder } from '../services/api';
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -14,9 +15,69 @@ const Checkout = () => {
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail ] = useState('');
+  const [phone, setPhone] = useState('');
+ const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+    const [state, setState] = useState('');
+      const [postalCode, setPostalCode] = useState('');
+
+
+
+
+
+
+
+
   const shippingCost = totalPrice >= 200 ? 0 : 15;
   const total = totalPrice + shippingCost;
 
+
+  const payNow = async (orderId: string ) => {
+  const res = await await payOrder(orderId)
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = res.data.payuUrl;
+
+  Object.entries(res.data.params).forEach(([k, v]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = k;
+    input.value = String(v);
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+};
+
+
+  const handlePlaceOrder = async () => {
+    try {
+      const order = await createOrder({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        shippingAddress: {
+          addressLine1:  address,
+          city: city,
+          state: state,
+          postalCode: postalCode,
+          country: 'India'
+        }
+      });
+
+      console.log('Order created:', order);
+      await payNow(order._id);
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Order failed');
+    }
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
@@ -24,7 +85,9 @@ const Checkout = () => {
     // Simulate order processing
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    clearCart();
+    await handlePlaceOrder()
+    // clearCart();
+
     toast({
       title: 'Order placed successfully!',
       description: 'Thank you for your purchase. You will receive a confirmation email shortly.',
@@ -78,20 +141,28 @@ const Checkout = () => {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" required className="mt-1.5" />
+                      <Input id="firstName" value={firstName} onChange={(e) => {
+                        setFirstName(e.target.value);
+                      }} required className="mt-1.5" />
                     </div>
                     <div>
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" required className="mt-1.5" />
+                      <Input value={lastName} onChange={(e) => {
+                        setLastName(e.target.value)
+                      }} id="lastName" required className="mt-1.5" />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required className="mt-1.5" />
+                    <Input id="email" value={email} onChange={(e) => {
+                        setEmail(e.target.value);
+                    }} type="email" required className="mt-1.5" />
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" type="tel" required className="mt-1.5" />
+                    <Input value={phone} onChange={(e) => {
+                        setPhone(e.target.value);
+                    }} id="phone" type="tel" required className="mt-1.5" />
                   </div>
                 </div>
               </div>
@@ -104,31 +175,39 @@ const Checkout = () => {
                 <div className="grid gap-4">
                   <div>
                     <Label htmlFor="address">Street Address</Label>
-                    <Input id="address" required className="mt-1.5" />
+                    <Input value={address} onChange={(e) => {
+                        setAddress(e.target.value);
+                    }} id="address" required className="mt-1.5" />
                   </div>
                   <div>
                     <Label htmlFor="apartment">Apartment, suite, etc. (optional)</Label>
-                    <Input id="apartment" className="mt-1.5" />
+                    <Input  id="apartment" className="mt-1.5" />
                   </div>
                   <div className="grid sm:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="city">City</Label>
-                      <Input id="city" required className="mt-1.5" />
+                      <Input value={city} onChange={(e) => {
+                        setCity(e.target.value);
+                      }} id="city" required className="mt-1.5" />
                     </div>
                     <div>
                       <Label htmlFor="state">State</Label>
-                      <Input id="state" required className="mt-1.5" />
+                      <Input value={state} onChange={(e) => {
+                        setState(e.target.value);
+                      }} id="state" required className="mt-1.5" />
                     </div>
                     <div>
                       <Label htmlFor="zip">ZIP Code</Label>
-                      <Input id="zip" required className="mt-1.5" />
+                      <Input value={postalCode} onChange={(e) => {
+                        setPostalCode(e.target.value)
+                      }} id="zip" required className="mt-1.5" />
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Payment */}
-              <div className="bg-card rounded-xl border border-border p-6">
+              {/* <div className="bg-card rounded-xl border border-border p-6">
                 <h2 className="font-display text-lg font-semibold text-foreground mb-4">
                   Payment
                 </h2>
@@ -163,7 +242,7 @@ const Checkout = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Order Summary */}
