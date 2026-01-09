@@ -1,4 +1,4 @@
-import { ShoppingBag, Heart, Menu, Search } from 'lucide-react';
+import { ShoppingBag, Heart, Menu, Search, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -11,6 +11,12 @@ interface HeaderProps {
 
 const Header = ({ searchQuery = '', onSearchChange }: HeaderProps) => {
   const { totalItems } = useCart();
+
+  const handleSignOut = () => {
+    sessionStorage.removeItem("accessToken");
+    window.location.href="/login"
+    return;
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -35,9 +41,9 @@ const Header = ({ searchQuery = '', onSearchChange }: HeaderProps) => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="text-foreground hover:text-primary">
+            {/* <Button variant="ghost" size="icon" className="text-foreground hover:text-primary">
               <Heart className="w-5 h-5" />
-            </Button>
+            </Button> */}
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="text-foreground hover:text-primary relative">
                 <ShoppingBag className="w-5 h-5" />
@@ -48,6 +54,10 @@ const Header = ({ searchQuery = '', onSearchChange }: HeaderProps) => {
                 )}
               </Button>
             </Link>
+            <Button variant="ghost" onClick={handleSignOut}>
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign Out
+                    </Button>
             <Button variant="ghost" size="icon" className="md:hidden text-foreground">
               <Menu className="w-5 h-5" />
             </Button>

@@ -76,7 +76,11 @@ const Checkout = () => {
       });
 
       console.log('Order created:', order);
-      await payNow(order._id);
+    //   await payNow(order._id);
+    
+
+    navigate("/order-details/"+order._id);
+
     } catch (error: any) {
       alert(error.response?.data?.message || 'Order failed');
     }
