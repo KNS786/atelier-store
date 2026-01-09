@@ -175,10 +175,10 @@ export const createOrder = async (payload: CreateOrderPayload) => {
 
 export const payOrder = async (orderId: string ) => {
     const token = sessionStorage.getItem('accessToken');
-    const { data } = await axios.post( `http://localhost:5000/api/payment/payu` , { orderId }, {
+    const response = await axios.post( `http://localhost:5000/api/payment/payu` , { orderId }, {
          headers: {
                     'Authorization': `Bearer ${token}`
                 },
     });
-    return data;
+    return response ;
 };

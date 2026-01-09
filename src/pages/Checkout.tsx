@@ -36,22 +36,26 @@ const Checkout = () => {
 
 
   const payNow = async (orderId: string ) => {
-  const res = await await payOrder(orderId)
+  const res = await payOrder(orderId)
+
+  const { payuUrl, params } = res.data;
 
   const form = document.createElement('form');
   form.method = 'POST';
-  form.action = res.data.payuUrl;
+  form.action = payuUrl;
 
-  Object.entries(res.data.params).forEach(([k, v]) => {
+  Object.entries(params).forEach(([key, value]) => {
     const input = document.createElement('input');
     input.type = 'hidden';
-    input.name = k;
-    input.value = String(v);
+    input.name = key;
+    input.value = String(value);
     form.appendChild(input);
   });
 
   document.body.appendChild(form);
   form.submit();
+
+  
 };
 
 
