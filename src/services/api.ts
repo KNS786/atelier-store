@@ -58,3 +58,91 @@ export const getProductById = async (id:string) => {
         throw error.response?.data as ErrorResponse || { detail: "Network error" };
     }
 };
+
+export const getCart = async () => {
+    try {
+        const token = sessionStorage.getItem('accessToken');
+        const response: AxiosResponse = await axios.get(
+            `http://localhost:5000/api/cart`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data as ErrorResponse || { detail: "Network error" };
+    }
+};
+
+// Add item to cart
+export const addToCart = async (productId: string, quantity: number) => {
+    const token = sessionStorage.getItem('accessToken');
+
+    const response: AxiosResponse = await axios.post(
+            `http://localhost:5000/api/cart`,
+            {
+                productId,
+                quantity
+            },
+            {
+                headers:{
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+           
+        );
+        return response.data;
+};
+
+// Update cart item quantity
+export const updateCartItem = async (productId: string, quantity: number) => {
+    const token = sessionStorage.getItem('accessToken');
+
+   const response: AxiosResponse = await axios.put(
+            `http://localhost:5000/api/cart`,
+            {
+                productId,
+                quantity
+            },
+            {
+                headers:{
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+};
+
+// Remove item from cart
+export const removeFromCart = async (productId: string ) => {
+
+    const token = sessionStorage.getItem('accessToken');
+
+   const response: AxiosResponse = await axios.delete(
+            `http://localhost:5000/api/cart/item/${productId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            },
+        );
+        return response.data;
+};
+
+// Clear entire cart
+export const clearCart = async () => {
+
+       const token = sessionStorage.getItem('accessToken');
+
+   const response: AxiosResponse = await axios.delete(
+            `http://localhost:5000/api/cart/clear`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            },
+        );
+        return response.data;
+};

@@ -38,8 +38,10 @@ const Index = () => {
       // Your API structure: { data: { data: [...products], pagination: {...} } }
       const products = result.data || [];
       const total = result?.pagination?.total || 0;
+
+      const updatedProducts = products.map((data :any) => ({...data, id: data._id || data.id }));
       
-      setProducts(products);
+      setProducts(updatedProducts);
       setTotalCount(total);
     } catch (err: any) {
       setError(err.message);

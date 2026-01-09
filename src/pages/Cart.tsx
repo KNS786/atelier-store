@@ -5,7 +5,20 @@ import { useCart } from '../contexts/CartContext';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 
 const Cart = () => {
-  const { items, updateQuantity, removeFromCart, totalPrice } = useCart();
+  const { items, updateQuantity, removeFromCart, totalPrice, loading } = useCart();
+
+  console.log("items:::", items);
+
+  if (loading && items.length === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-16 text-center">
+          <p className="text-muted-foreground">Loading cart...</p>
+        </main>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -38,74 +51,77 @@ const Cart = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <div
-                key={item.product.id}
-                className="flex gap-4 p-4 bg-card rounded-xl border border-border"
-              >
-                <Link to={`/product/${item.product.id}`} className="shrink-0">
-                  <img
-                    src={item.product.image}
-                    alt={item.product.name}
-                    className="w-24 h-24 object-cover rounded-lg"
-                  />
-                </Link>
-                <div className="flex-1 min-w-0">
-                  <Link to={`/product/${item.product.id}`}>
-                    <h3 className="font-display font-medium text-foreground truncate hover:text-primary transition-colors">
-                      {item.product.name}
-                    </h3>
+            {items.map((item:any) => {
+              const productId = item.product._id || item.product.id;
+              
+              return (
+                <div
+                  key={productId}
+                  className="flex gap-4 p-4 bg-card rounded-xl border border-border"
+                >
+                  <Link to={`/product/${productId}`} className="shrink-0">
+                    <img
+                      src={item.product.image}
+                      alt={item.product.name}
+                      className="w-24 h-24 object-cover rounded-lg"
+                    />
                   </Link>
-                  <p className="text-sm text-muted-foreground capitalize">
-                    {item.product.category}
-                  </p>
-                  <p className="font-display font-semibold text-foreground mt-1">
-                    ${item.product.price}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <Link to={`/product/${productId}`}>
+                      <h3 className="font-display font-medium text-foreground truncate hover:text-primary transition-colors">
+                        {item.product.name}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-muted-foreground capitalize">
+                      {item.product.category}
+                    </p>
+                    <p className="font-display font-semibold text-foreground mt-1">
+                      ${item.product.price}
+                    </p>
 
-                  <div className="flex items-center gap-3 mt-3">
-                    <div className="flex items-center gap-2 bg-muted rounded-full">
+                    <div className="flex items-center gap-3 mt-3">
+                      <div className="flex items-center gap-2 bg-muted rounded-full">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full"
+                          onClick={() => updateQuantity(productId, item.quantity - 1)}
+                          disabled={loading}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-8 text-center font-medium">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full"
+                          onClick={() => updateQuantity(productId, item.quantity + 1)}
+                          disabled={loading}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={() =>
-                          updateQuantity(item.product.id, item.quantity - 1)
-                        }
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => removeFromCart(productId)}
+                        disabled={loading}
                       >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                      <span className="w-8 text-center font-medium">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={() =>
-                          updateQuantity(item.product.id, item.quantity + 1)
-                        }
-                      >
-                        <Plus className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => removeFromCart(item.product.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-display font-semibold text-foreground">
+                      ${(item.product.price * item.quantity).toFixed(2)}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-display font-semibold text-foreground">
-                    ${(item.product.price * item.quantity).toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Order Summary */}
