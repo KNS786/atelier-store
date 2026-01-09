@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/index";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Auth/LoginPage";
+import Signup from "./pages/Auth/SignUp";
 
 const queryClient = new QueryClient();
 
@@ -16,9 +18,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+
+         <Route path='/login' element={<Login/>}/>
+         <Route path='/signup' element={<Signup/>}/>
+
           <Route path="/" element={<Index />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
