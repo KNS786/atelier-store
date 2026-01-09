@@ -55,6 +55,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const result = await cartApi.addToCart(product._id || product.id, quantity);
       const cartData = result.data?.data || result.data || result;
       setItems(cartData.items || []);
+
+      fetchCart();
     } catch (err: any) {
       setError(err.message);
       console.error('Error adding to cart:', err);
